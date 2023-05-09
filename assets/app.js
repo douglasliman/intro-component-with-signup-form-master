@@ -1,8 +1,9 @@
-// const nameInputRef = document.querySelector("#name");
-// const lastNameInputRef = document.querySelector("#lastName");
-// const emailInputRef = document.querySelector("#email");
-// const passwordInputRef = document.querySelector("#password");
-// const confirmPasswordInputRef = document.querySelector("#confirmPassword");
+const nameInputRef = document.querySelector("#name");
+const lastNameInputRef = document.querySelector("#lastName");
+const emailInputRef = document.querySelector("#email");
+const passwordInputRef = document.querySelector("#password");
+const confirmPasswordInputRef = document.querySelector("#confirmPassword");
+
 const inputsRef = document.querySelectorAll("input");
 let isSubmited = false;
 
@@ -17,7 +18,7 @@ const inputsToValidate = [
   },
   {
     id: "lastName",
-    minLength: 8,
+    minLength: 5,
   },
   {
     id: "email",
@@ -26,18 +27,23 @@ const inputsToValidate = [
   },
   {
     id: "password",
-    minLength: 8,
+    minLength: 6,
   },
   {
     id: "confirmPassword",
-    minLength: 8,
+    minLength: 6,
   },
 ];
 
 function validateForm(event) {
   event.preventDefault();
   isSubmited = true;
+  validEmail();
+  validatePasswordAndConfirmPassword();
+  validateAllFieldsOnSubmit();
+}
 
+function validEmail() {
   const emailInput = document.querySelector("#email");
   const emailValue = emailInput.value.trim();
 
@@ -51,23 +57,30 @@ function validateForm(event) {
   emailInput.classList.remove("error");
 }
 
-// function some_func(otherFunc, ev) {
-//   // magic happens
-// }
-// someObj.addEventListener("click", some_func.bind(null, some_other_func), false);
-function validateOnKeyup() {
+function validatePasswordAndConfirmPassword() {
+  const passwordInput = document.querySelector("#password");
+  const confirmPasswordInput = document.querySelector("#confirmPassword");
+
+  if (passwordInput.value !== confirmPasswordInput.value) {
+    passwordInput.classList.add("error");
+    confirmPasswordInput.classList.add("error");
+    return false;
+  }
+  passwordInput.classList.add("error");
+  confirmPasswordInput.classList.remove("error");
+  return true;
+}
+
+function validateAllFieldsOnSubmit() {
   inputsToValidate.forEach((input) => {
     const inputRef = document.querySelector(`#${input.id}`);
+    const inputRefTrimed = inputRef.value.trim();
 
-    isSubmited = true;
-    inputRef.addEventListener(
-      "input",
-      validateMinLength.bind(inputRef, input.minLength)
-    );
-    inputRef.addEventListener(
-      "blur",
-      validateMinLength.bind(inputRef, input.minLength)
-    );
+    if (inputRefTrimed.length < input.minLength) {
+      inputRef.classList.add("error");
+    } else {
+      inputRef.classList.remove("error");
+    }
   });
 }
 
@@ -86,7 +99,42 @@ function validateMinLength(minLength, inputRef) {
   inputRef.currentTarget.classList.remove("error");
 }
 
+function validateOnInput() {
+  inputsToValidate.forEach((input) => {
+    const inputRef = document.querySelector(`#${input.id}`);
+    isSubmited = true;
+    inputRef.addEventListener("blur", validate.bind(inputRef, input));
+  });
+}
+
+function validate(inputRef, input) {
+  if (input.pattern) {
+    validatePattern(inputRef, input.pattern);
+  }
+
+  if (input.minLength) {
+    validateMinLength(inputRef, input.minLength);
+  }
+
+  if (hasError) {
+    showErrorMessage(inputRef, input.id);
+  } else {
+    removeErrorMenssage(inputRef);
+  }
+}
+
+function showErrorMessage() {
+  const errorText = document.querySelector(`#textError${id}`);
+  errorText.style.display = "block";
+  errorText.classList.add("error");
+}
+
+function removeErrorMenssage() {
+  const textoError = document.querySelector(`#textErro${id}}`);
+  textoError.classList.remove("error");
+}
+
 inputsRef.forEach((input) => {
-  input.addEventListener("keyup", validateOnKeyup);
+  input.addEventListener("keyup", validateOnInput);
 });
 buttonRef.addEventListener("click", validateForm);
